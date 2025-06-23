@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebAR Video Player</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/AR-js-org/AR.js/3.3.2/aframe/build/aframe-ar.min.js"></script>
+  </head>
+  <body style="margin: 0; overflow: hidden">
+    <a-scene embedded arjs>
+      <a-assets id="videoAssets"></a-assets>
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+      fetch('mapping.json')
+        .then(res => res.json())
+        .then(markers => {
+          markers.forEach((entry, i) => {
+            const scene = document.querySelector('a-scene');
+            const assets = document.querySelector('#videoAssets');
+
+            const videoId = 'vid' + i;
+            const videoEl = document.createElement('video');
+            videoEl.setAttribute('id', videoId);
+            videoEl.setAttribute('src', entry.video);
+            videoEl.setAttribute('autoplay', 'true');
+            videoEl.setAttribute('loop', '');
+            videoEl.setAttribute('muted', ''); // Required for autoplay
+            videoEl.setAttribute('playsinline', '');
+            assets.appendChild(videoEl);
+
+            const marker = document.createElement('a-marker');
+            marker.setAttribute('type', 'pattern');
+            marker.setAttribute('url', entry.marker);
+
+            const aVideo = document.createElement('a-video');
+            aVideo.setAttribute('src', '#' + videoId);
+            aVideo.setAttribute('width', '4');
+            aVideo.setAttribute('height', '2.25');
+            aVideo.setAttribute('position', '0 0 0');
+            marker.appendChild(aVideo);
+
+            // Unmute on click
+            marker.addEventListener('click', () => {
+              videoEl.muted = false;
+              videoEl.play();
+            });
+
+            scene.appendChild(marker);
+          });
+        });
+    </script>
+  </body>
+</html>
